@@ -8,6 +8,7 @@ class TaskSchema(BaseModel):
     assignee_id: Optional[int] = None
     status_id: int
     priority_id: int
+    created_by: Optional[int] = None
     start_date: Optional[date] = None
     end_date: Optional[date] = None
     estimated_hours: Optional[int] = None

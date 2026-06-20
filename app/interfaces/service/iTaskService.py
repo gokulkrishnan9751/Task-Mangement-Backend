@@ -22,6 +22,6 @@ class ITaskService(ABC):
         pass
 
     @abstractmethod
-    def update_status(self, task_id: int, status: int):
+    def status_update(self, task_id: int, status: int):
         pass
     

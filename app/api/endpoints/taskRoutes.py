@@ -12,6 +12,7 @@ def get_tasks(service: TaskServiceDep, user: CurrentUserDep):
 
 @route.post('/create')
 def create_task(task: TaskSchema, service: TaskServiceDep, user: CurrentUserDep):
+    print (user)
     return service.save_task(task, user)
 
 @route.put('/update')

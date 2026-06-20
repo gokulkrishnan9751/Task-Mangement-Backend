@@ -26,10 +26,16 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        pip install uvicorn pytest pytest-asyncio
 
-    - name: Test app startup
+    - name: Verify app configuration
       run: |
-        timeout 10 python app/main.py &
-        sleep 5
-        curl -f http://localhost:8000/docs || exit 1
-      continue-on-error: true
+        python -c "from app.main import app; print('App imported successfully')"
+
+    - name: Start app and test health
+      run: |
+        python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 > /tmp/app.log 2>&1 &
+        APP_PID=$!
+        sleep 3
+        curl -f http://localhost:8000/docs && echo "App is running" || (cat /tmp/app.log && exit 1)
+        kill $APP_PID 2>/dev/null || true

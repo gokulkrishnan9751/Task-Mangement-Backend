@@ -1,0 +1,41 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11']
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install uvicorn pytest pytest-asyncio
+
+    - name: Verify app configuration
+      run: |
+        python -c "from app.main import app; print('App imported successfully')"
+
+    - name: Start app and test health
+      run: |
+        python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 > /tmp/app.log 2>&1 &
+        APP_PID=$!
+        sleep 3
+        curl -f http://localhost:8000/docs && echo "App is running" || (cat /tmp/app.log && exit 1)
+        kill $APP_PID 2>/dev/null || true
